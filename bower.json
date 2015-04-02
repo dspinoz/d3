@@ -1,0 +1,28 @@
+{
+  "name": "websocket-d3-test",
+  "version": "0.0.1",
+  "description": "test with d3 and web sockets",
+  "main": "index3.html",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "node",
+    "d3",
+    "websocket"
+  ],
+  "authors": [
+    "Daniel Spinozzi"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.4.13"
+  }
+}
