@@ -24,7 +24,7 @@
 
   var data = [];
 
-    var conn = new WebSocket("ws://localhost:1080", "echo-protocol");
+    var conn = new WebSocket(document.URL.replace('http','ws'), "echo-protocol");
     conn.onopen = function() {
       console.log("WS OPEN");
       d3.select('#send-hello').on('click', function() {  
