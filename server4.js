@@ -80,18 +80,25 @@ wsServer.on('request', function(request) {
 
     //my client index
     var index = clients.push(connection) - 1;
+    connection.send(JSON.stringify({registration: true, id: index}));
+
+    for(var i=0; i < clients.length; i++) {
+      if (i != index)
+        clients[i].sendUTF(JSON.stringify({joined: true, id:index}));
+    }
 
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
-            console.log('Received Message: ' + message.utf8Data);
-            //the client
-            //connection.sendUTF(message.utf8Data);
+            console.log('Received Message from ' +index+': ' + message.utf8Data);
 
-	    //broadcast to all clients
-	    for(var i=0; i < clients.length; i++) {
-              clients[i].sendUTF(JSON.stringify({id:index, txt:message.utf8Data}));
+            var js = JSON.parse(message.utf8Data);
+
+            if (js.txt) {
+	      //broadcast to all clients
+	      for(var i=0; i < clients.length; i++) {
+                clients[i].sendUTF(JSON.stringify({id:index, txt: js.txt}));
+              }
             }
-
         }
         else if (message.type === 'binary') {
             console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
