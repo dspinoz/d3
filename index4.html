@@ -18,8 +18,8 @@
     $('#txt-message').attr('disabled', 'disabled');
 
     d3.select('button#send').on('click', function() {
-      console.log('send', $('#txt-message').val());
       conn.send(JSON.stringify({txt: $('#txt-message').val()}));
+      $('#txt-message').val('');
     });
 
     conn.onopen = function() {
