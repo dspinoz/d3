@@ -9,6 +9,7 @@
  <link type='text/css' rel='stylesheet' href='/bootstrap.css'/>
  <script src="/d3.js" type="text/javascript" charset="utf-8"></script>
  <script type="text/javascript">
+  var myid = undefined;
   $(document).ready(function() {
     var conn = new WebSocket(document.URL.replace('http','ws'), "echo-protocol");
     var messages = [];
@@ -34,29 +35,48 @@
       
       if (js.registration) {
         $('#chat-status').html("<span class='glyphicon glyphicon-ok'> Registered as "+js.id+"</span>"); 
+        myid = js.id;
       }
-      else if (js.txt || js.joined) {
-        messages.push(js);
-        show(messages);
-      }
+      
+      messages.push(js);
+      show(messages);
     };
     conn.onclose = function() {
       $('#chat-status').html("<span class='glyphicon glyphicon-remove'> Disconnected</span>"); 
+      myid = undefined;
     };
   });
 
   function show(data) {
-    console.log(data);
     var li = d3.select('#chat-content').selectAll('li.list-group-item').data(data);
     
     li.enter()
       .append('li')
         .attr('class', 'list-group-item');
 
-    li.
-      text(function(d) {
+    li
+      .text(function(d) {
+        d3.select(this).classed('list-group-item-success', myid == d.id);
+        d3.select(this).classed('list-group-item-info', myid != d.id);
+        d3.select(this).classed('list-group-item-warning', d.joined != undefined);
+        d3.select(this).classed('list-group-item-danger', d.left != undefined);
+        
+	if (d.registration) {
+          return "You joined the convo";
+        }
+	else if (d.joined) {
+          return "user " + d.id + " joined the convo";
+        }
+        else if (d.left) {
+          return "user " + d.id + " left the convo";
+        }
+        else if (d.txt) {
+          return d.id + ": "  + d.txt;
+        }
+
         return JSON.stringify(d);
-      });
+      })
+      ;
 
     li.exit().remove();
   }

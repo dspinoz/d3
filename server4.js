@@ -83,7 +83,7 @@ wsServer.on('request', function(request) {
     connection.send(JSON.stringify({registration: true, id: index}));
 
     for(var i=0; i < clients.length; i++) {
-      if (i != index)
+      if (i != index && clients[i])
         clients[i].sendUTF(JSON.stringify({joined: true, id:index}));
     }
 
@@ -96,7 +96,8 @@ wsServer.on('request', function(request) {
             if (js.txt) {
 	      //broadcast to all clients
 	      for(var i=0; i < clients.length; i++) {
-                clients[i].sendUTF(JSON.stringify({id:index, txt: js.txt}));
+                if (clients[i])
+                  clients[i].sendUTF(JSON.stringify({id:index, txt: js.txt}));
               }
             }
         }
@@ -106,7 +107,12 @@ wsServer.on('request', function(request) {
         }
     });
     connection.on('close', function(reasonCode, description) {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+      console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+      clients[index] = undefined;
+      for(var i=0; i < clients.length; i++) {
+        if (i != index && clients[i])
+          clients[i].sendUTF(JSON.stringify({left: true, id:index}));
+      }
     });
 });
 
