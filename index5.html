@@ -14,12 +14,13 @@
     var conn = new WebSocket(document.URL.replace('http','ws'), "echo-protocol");
     var data = [];
     var packets = [];
+    var totalLen = 0;
     
     $('#send').attr('disabled', 'disabled');
     $('#txt-message').attr('disabled', 'disabled');
 
     setInterval(function() {
-      d3.select('#count').text("len " + data2.length + " packets " + packets.length);
+      d3.select('#count').text("len " + data2.length + " packets " + packets.length + " " + totalLen + " bytes");
       //conn.send(JSON.stringify({a:"b"}, true, "           "));
     }, 500);
 
@@ -45,6 +46,8 @@ var i = 0;
       arr.forEach(function(pack) {	
           var src = pack.src.o1+'-'+pack.src.o2+'-'+pack.src.o3+'-'+pack.src.o4;
           var dst = pack.dst.o1+'-'+pack.dst.o2+'-'+pack.dst.o3+'-'+pack.dst.o4;
+
+          totalLen += pack.len;
         
           if (c.get(src) == undefined) c.set(src,d3.set());
           c.get(src).add(dst);
@@ -88,7 +91,7 @@ function show(data) {
   var link = links.enter()
     .append("path")
       .attr("class", "link")
-      .style('stroke', '#0c0')
+      .style('stroke', '#c00')
       .transition()
         .duration(1000)
         .style('stroke', '#ccc');
@@ -161,11 +164,11 @@ data = {
 };
 
 var data2 = [
-  {name:"a", connects:["b","g","h","i"]},
+/*  {name:"a", connects:["b","g","h","i"]},
   {name:"b"},
   {name:"a", connects:["j", "k", "l"]},
   {name:"b", connects:["n", "m", "l"]},
-  {name:"a", connects:["j"]}
+  {name:"a", connects:["j"]} */
 ];
 
 function convert(data) {
@@ -189,8 +192,6 @@ function convert(data) {
      a.children.push({name: dst});
    });
   });
-
-console.log(ret);
 
   return ret;
 }

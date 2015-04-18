@@ -80,7 +80,11 @@ pcap_session.on('packet', function (raw_packet) {
 
 if (packet.payload && packet.payload.payload && packet.payload.payload.version == 4) {
 
-  packet_cache.push({src: packet.payload.payload.saddr, dst: packet.payload.payload.daddr});
+  packet_cache.push({src: packet.payload.payload.saddr, dst: packet.payload.payload.daddr, 
+                     len: packet.payload.payload.total_length});
+
+//console.log(packet.payload.payload);
+
   if (packet_cache.length > 50) {
 
 console.log(++count * packet_cache.length);
