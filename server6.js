@@ -11,11 +11,18 @@ app.configure(function() {
 });
 
 app.get('/', function(req,res) {
-  res.sendfile('index3.html');
+  res.sendfile('index6.html');
 });
 
 app.get('/d3.js', function(req,res) {
   res.sendfile('bower_components/d3/d3.js');
+});
+app.get('/d3.hive.js', function(req,res) {
+  res.sendfile('d3-hive/d3.hive.v0.js');
+});
+
+app.get('/flare.json', function(req,res) {
+  res.sendfile('flare.json');
 });
 
 server.listen(8080, function() {
