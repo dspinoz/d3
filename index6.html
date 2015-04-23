@@ -26,7 +26,7 @@ var width = 960,
     height = 500,
     innerRadius = 40,
     outerRadius = 240,
-    NUM_AXIS = 5;
+    NUM_AXIS = 6;
 
 var angle = d3.scale.ordinal().domain(d3.range(NUM_AXIS+1)).rangePoints([0, 2 * Math.PI]),
     radius = d3.scale.linear().range([innerRadius, outerRadius]),
@@ -36,11 +36,11 @@ var nodes = [
   {x: 0, port: .1, ip: "10.1.1.16"},//8080
   {x: 0, port: .9, ip: "10.1.1.16"},//55567 (user port)
   {x: 1, port: .2, dns:"www.google.com"},//80
-  {x: 1, port: .3, dns:"wew.google.com"},//443
+  {x: 1, port: .3, dns:"www.google.com"},//443
   {x: 2, port: .8, dns:"www.ebay.com"},
   {x: 3, port: .5, dns:"www.ubuntu.org"},
-  {x: 4, port: .8, dns:"gmail.com"},
-  {x: 3, port: .5, ip: "10.1.1.12"} //34333(usr)
+  {x: 4, port: .8, dns:"mail.google.com"},
+  {x: 5, port: .5, ip: "10.1.1.12"} //34333(usr)
 ];
 
 var links = [
@@ -81,7 +81,7 @@ svg.selectAll(".link")
     .on('mouseover', function(d) {
       console.log('link hover', d.source, d.target);
     });
-
+/*
 svg.selectAll(".node")
     .data(nodes)
   .enter().append("circle")
@@ -93,6 +93,25 @@ svg.selectAll(".node")
     .on('mouseover', function(d) {
       console.log('node hover', d);
     });
+*/
+
+  svg.selectAll('image').data(nodes).enter()
+    .append('image')
+      .attr('xlink:href', function(d) { 
+        if (!d.dns){
+          return "http://www.i2symbol.com/images/symbols/geometry/large_circle_u25EF_icon_256x256.png";
+        } 
+        return "http://"+d.dns+"/favicon.ico"; 
+      })
+      .attr("transform", function(d) { return "rotate(" + degrees(angle(d.x)) + ")"; })
+      .attr("x", function(d) { return radius(d.port)-8; })
+      .attr('y', -8)
+      .attr('width', 16)
+      .attr('height', 16)
+      .on('mouseover', function(d) {
+        console.log('node hover', d);
+      });
+
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;
