@@ -33,27 +33,24 @@ var angle = d3.scale.ordinal().domain(d3.range(NUM_AXIS+1)).rangePoints([0, 2 * 
     color = d3.scale.category10().domain(d3.range(20));
 
 var nodes = [
-  {x: 0, y: .1},
-  {x: 0, y: .9},
-  {x: 1, y: .2},
-  {x: 1, y: .3},
-  {x: 2, y: .1},
-  {x: 2, y: .8},
-  {x: 3, y: .5},
-  {x: 4, y: .8}
+  {x: 0, port: .1, ip: "10.1.1.16"},//8080
+  {x: 0, port: .9, ip: "10.1.1.16"},//55567 (user port)
+  {x: 1, port: .2, dns:"www.google.com"},//80
+  {x: 1, port: .3, dns:"wew.google.com"},//443
+  {x: 2, port: .8, dns:"www.ebay.com"},
+  {x: 3, port: .5, dns:"www.ubuntu.org"},
+  {x: 4, port: .8, dns:"gmail.com"},
+  {x: 3, port: .5, ip: "10.1.1.12"} //34333(usr)
 ];
 
 var links = [
-  {source: nodes[0], target: nodes[1]},
-  {source: nodes[0], target: nodes[2]},
   {source: nodes[1], target: nodes[3]},
-  {source: nodes[6], target: nodes[3]},
-  {source: nodes[7], target: nodes[6]},
-  {source: nodes[2], target: nodes[4]},
-  {source: nodes[2], target: nodes[5]},
-  {source: nodes[3], target: nodes[5]},
-  {source: nodes[4], target: nodes[0]},
-  {source: nodes[5], target: nodes[1]}
+  {source: nodes[1], target: nodes[4]},
+  {source: nodes[1], target: nodes[5]},
+  {source: nodes[2], target: nodes[6]},
+  {source: nodes[2], target: nodes[6]},
+  {source: nodes[7], target: nodes[0]},
+  {source: nodes[7], target: nodes[4]},
 ];
 
 var svg = d3.select("body").append("svg")
@@ -79,7 +76,7 @@ svg.selectAll(".link")
     .attr("class", "link")
     .attr("d", d3.hive.link()
     .angle(function(d) { return angle(d.x); })
-    .radius(function(d) { return radius(d.y); }))
+    .radius(function(d) { return radius(d.port); }))
     .style("stroke", function(d) { return color(d.source.x); })
     .on('mouseover', function(d) {
       console.log('link hover', d.source, d.target);
@@ -90,7 +87,7 @@ svg.selectAll(".node")
   .enter().append("circle")
     .attr("class", "node")
     .attr("transform", function(d) { return "rotate(" + degrees(angle(d.x)) + ")"; })
-    .attr("cx", function(d) { return radius(d.y); })
+    .attr("cx", function(d) { return radius(d.port); })
     .attr("r", 5)
     .style("fill", function(d) { return color(d.x); })
     .on('mouseover', function(d) {
