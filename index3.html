@@ -1,0 +1,50 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <script src="/d3.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+  <h1>hello world</h1>
+  <button id="send-hello">hello</button>
+  <script type="text/javascript">
+
+  function draw(data) {
+    var p = d3.select('body').selectAll('p').data(data);
+
+    p.enter()
+	.append('p').text(function(d) { console.log(d); return JSON.stringify(d); });
+
+    p.text(function(d) { return JSON.stringify(d); });
+
+    p.exit()
+	.remove();
+
+  }
+
+
+  var data = [];
+
+    var conn = new WebSocket(document.URL.replace('http','ws'), "echo-protocol");
+    conn.onopen = function() {
+      console.log("WS OPEN");
+      d3.select('#send-hello').on('click', function() {  
+      conn.send("HELLO WORLD");
+      });
+
+    };
+    conn.onerror = function(err) {
+      console.log("ERROR:", err);
+    };
+    conn.onmessage = function(msg) {
+      var js = JSON.parse(msg.data);
+      console.log("INCOMMING:", msg, js);
+      data.push({id:js.id, txt:js.txt});
+      draw(data);
+    };
+    conn.onclose = function() {
+      console.log("CLOSED");
+    };
+
+  </script>
+</body>
+</html>

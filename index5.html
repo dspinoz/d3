@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset='utf-8'/>
+ <meta name='viewport' content='width=device-width,initial-scale=1'/>
+ <title>Test4</title>
+ <script type='text/javascript' src='/jquery.js'></script>
+ <script type='text/javascript' src='/bootstrap.js'></script>
+ <link type='text/css' rel='stylesheet' href='/bootstrap.css'/>
+ <script src="/d3.js" type="text/javascript" charset="utf-8"></script>
+ <script type="text/javascript">
+  var myid = undefined;
+  $(document).ready(function() {
+    var conn = new WebSocket(document.URL.replace('http','ws'), "echo-protocol");
+    var data = [];
+    var packets = [];
+    var totalLen = 0;
+    
+    $('#send').attr('disabled', 'disabled');
+    $('#txt-message').attr('disabled', 'disabled');
+
+    setInterval(function() {
+      d3.select('#count').text("len " + data2.length + " packets " + packets.length + " " + totalLen + " bytes");
+      //conn.send(JSON.stringify({a:"b"}, true, "           "));
+    }, 500);
+
+
+    d3.select('button#send').on('click', function() {
+      conn.send(JSON.stringify({txt: $('#txt-message').val()}));
+      $('#txt-message').val('');
+    });
+
+var i = 0;
+
+    conn.onopen = function() {
+      $('#send').removeAttr('disabled');
+      $('#txt-message').removeAttr('disabled');
+      $('#chat-status').html("<span class='glyphicon glyphicon-ok'> Connected</span>"); 
+    };
+    conn.onerror = function(err) {
+      $('#chat-status').html("<span class='glyphicon glyphicon-remove'> "+err+"</span>"); 
+    };
+    conn.onmessage = function(msg) {
+      var arr = JSON.parse(msg.data);
+      var c = d3.map();
+      arr.forEach(function(pack) {	
+          var src = pack.src.o1+'-'+pack.src.o2+'-'+pack.src.o3+'-'+pack.src.o4;
+          var dst = pack.dst.o1+'-'+pack.dst.o2+'-'+pack.dst.o3+'-'+pack.dst.o4;
+
+          totalLen += pack.len;
+        
+          if (c.get(src) == undefined) c.set(src,d3.set());
+          c.get(src).add(dst);
+      });
+      
+      packets.push(1);
+
+      c.entries().forEach(function(d) {
+        data2.push({name:d.key, connects:d.value.values()});
+      });
+      //data2.push({name: "gg", connects:[""+i++]});
+
+      show(convert(data2));
+    };
+    conn.onclose = function() {
+      $('#chat-status').html("<span class='glyphicon glyphicon-remove'> Disconnected</span>"); 
+      myid = undefined;
+    };
+
+var radius = 500 / 2;
+
+var cluster = d3.layout.cluster()
+    .size([360, radius - 120]);
+
+var diagonal = d3.svg.diagonal.radial()
+    .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
+
+var svg = d3.select("#main-content").append("svg")
+    .attr("width", radius * 2)
+    .attr("height", radius * 2)
+  .append("g")
+    .attr("transform", "translate(" + radius + "," + radius + ")");
+
+//d3.json("/d/4063550/flare.json", function(error, root) {
+function show(data) {
+  var nodes = cluster.nodes(data);
+
+  var links = svg.selectAll("path.link")
+      .data(cluster.links(nodes));
+
+  var link = links.enter()
+    .append("path")
+      .attr("class", "link")
+      .style('stroke', '#c00')
+      .transition()
+        .duration(1000)
+        .style('stroke', '#ccc');
+
+  links
+      .attr("d", diagonal)
+      .style('stroke', '#00c')
+      .transition()
+        .duration(1000)
+        .style('stroke', '#ccc');
+        
+
+  links.exit().remove();
+
+  var nodes = svg.selectAll("g.node")
+      .data(nodes);
+
+  var node = nodes.enter().append("g")
+      .attr("class", "node")
+
+  nodes
+      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+
+  nodes.exit().remove();
+
+  node.append("circle")
+      .attr("r", 4.5);
+
+  node.append("text")
+      .attr("dy", ".31em")
+      .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+      .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
+      .text(function(d) { return d.name; });
+//});
+}
+
+d3.select(self.frameElement).style("height", radius * 2 + "px");
+
+data = {
+ "name": "",
+ "children": [
+  {
+   "name": "a",
+   "children": [
+    {
+     "name": "b",
+     "children": [
+      {"name": "c", "size": 3938, "children":[{"name":"k"}]},
+      {"name": "d", "size": 3812, "children":[{"name":"k"}]},
+      {"name": "e", "size": 6714},
+      {"name": "f", "size": 743}
+     ]
+    },
+    {
+     "name":"g"
+    },
+    {
+     "name":"h"
+    },
+    {
+     "name":"i"
+    },
+    {
+     "name":"j",
+     "children": [
+       {"name":"a"}
+     ]
+    }]
+  }]
+};
+
+var data2 = [
+/*  {name:"a", connects:["b","g","h","i"]},
+  {name:"b"},
+  {name:"a", connects:["j", "k", "l"]},
+  {name:"b", connects:["n", "m", "l"]},
+  {name:"a", connects:["j"]} */
+];
+
+function convert(data) {
+  var map = d3.map();
+
+  data.forEach(function(d) {
+   if (map.get(d.name) == undefined) map.set(d.name, {orig: d, nodes: d3.set()});
+   if (d.connects) {
+    d.connects.forEach(function(c) {
+     map.get(d.name).nodes.add(c);
+    });
+   }
+  });
+
+  // convert to object
+  var ret = {name:"root", children:[]};
+  map.entries().forEach(function(src) {
+   var a = {name:src.key, children:[]};
+   ret.children.push(a);
+   src.value.nodes.values().forEach(function(dst) {
+     a.children.push({name: dst});
+   });
+  });
+
+  return ret;
+}
+
+show(convert(data2));
+
+
+});
+
+ </script>
+ <style>
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node {
+  font: 10px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+
+ </style>
+</head>
+
+<body>
+ <nav class="navbar navbar-default navbar-static-top">
+  <div class="container">
+   <div class="navbar-header">
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+     <span class="sr-only">Toggle navigation</span>
+     <span class="icon-bar"></span>
+     <span class="icon-bar"></span>
+     <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">Test4</a>
+   </div>
+   <div id="navbar" class="navbar-collapse collapse">
+    <ul class="nav navbar-nav">
+     <li class="active"><p class="navbar-text" id="chat-status"></p></li>
+    </ul>
+   </div>
+  </div>
+ </nav>
+ <div class='container' style='font:12px sans-serif;'>
+  <div class='row'>
+   <div class='span12'>
+    <pre class="container" id="count"></pre>
+    <div class='container' id='main-content'></div>
+   </div>
+  </div>
+ </div>
+
+ <footer class="footer">
+  <div class="container">
+   <p class="text-muted">
+    <div class='input-group'>
+     <input type='text' id='txt-message' placeholder='hello' class='form-control'/>
+     <span class='input-group-btn'>
+      <button type='button' class='btn btn-default' id='send'>Send</button>
+     </span>
+    </div>
+   </p>
+  </div>
+ </footer>
+
+</body>
+</html>

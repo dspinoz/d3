@@ -1,0 +1,20 @@
+{
+  "name": "websocket-d3-test",
+  "version": "0.0.1",
+  "description": "Tester for websockets and d3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "test",
+    "websocket",
+    "d3"
+  ],
+  "author": "Daniel Spinozzi",
+  "license": "MIT",
+  "dependencies": {
+    "websocket": "~1.0.8",
+    "pcap": "~2.0.1"
+  }
+}

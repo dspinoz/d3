@@ -1,0 +1,22 @@
+<html>
+<body>
+  <h1>hello world</h1>
+  <script type="text/javascript">
+    var conn = new WebSocket("ws://localhost:1080", "echo-protocol");
+    conn.onopen = function() {
+      console.log("WS OPEN");
+      conn.send("HELLO WORLD");
+    };
+    conn.onerror = function(err) {
+      console.log("ERROR:", err);
+    };
+    conn.onmessage = function(msg) {
+      console.log("INCOMMING:", msg);
+    };
+    conn.onclose = function() {
+      console.log("CLOSED");
+    };
+
+  </script>
+</body>
+</html>
