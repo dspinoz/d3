@@ -1,4 +1,6 @@
 d3
 ==
+A series of examples for d3.js
 
-D3 Examples
+
+
